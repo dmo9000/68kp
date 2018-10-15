@@ -13,6 +13,8 @@ installtest:
 clean:
 	rm -rf obj
 	rm -f sim
+	rm -f *.o
+	rm -f cpmsim
 
 obj:
 	mkdir obj
