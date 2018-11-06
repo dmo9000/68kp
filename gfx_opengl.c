@@ -30,28 +30,34 @@ int gfx_opengl_drawglyph(BitmapFont *font, uint16_t px, uint16_t py, uint8_t gly
 extern BitmapFont *myfont;
 
 void output_character(char c)
-{   
+{
     int i = 0, j = 0;
     static int cx=0, cy=0;
-		//printf("output character = %c\r\n", c);
+    //printf("output character = %c\r\n", c);
 
 
-		if (c == '\r') {
-			cy++;
-			return;
-			}
+    if (c == '\r') {
+        cy++;
+        if (cy > 23 ) {
+            /* hardware scroll required */
+            gfx_opengl_hwscroll();
+            cy = 23;
+        }
 
-		if (c == '\n') {
-			cx = 0;
-			return;
-			}
+        return;
+    }
 
-		if (cy > 23 ) {
-			/* hardware scroll required */
-			gfx_opengl_hwscroll();
-			cy = 23;
-			}
-		//assert (cy < 25);
+    if (c == '\n') {
+        cx = 0;
+        return;
+    }
+
+    if (cy > 23 ) {
+        /* hardware scroll required */
+        gfx_opengl_hwscroll();
+        cy = 23;
+    }
+    //assert (cy < 25);
 
     gfx_opengl_drawglyph(myfont, cx, cy, c, 7, 0, 0);
     cx++;
@@ -64,12 +70,12 @@ void output_character(char c)
 void updateTexture()
 {
 
-		/*
+    /*
     while (p[0] != 0) {
-        output_character(p[0]);
-        p++;
+    output_character(p[0]);
+    p++;
     }
-		*/
+    */
     glTexSubImage2D(GL_TEXTURE_2D, 0,0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid*)screenData);
     glBegin( GL_QUADS );
     glTexCoord2d(0.0, 0.0);
@@ -93,8 +99,8 @@ void display()
 
 void reshape_window(GLsizei w, GLsizei h)
 {
-		//w = SCREEN_WIDTH;
-		//h = SCREEN_HEIGHT;
+    //w = SCREEN_WIDTH;
+    //h = SCREEN_HEIGHT;
     //printf("reshape_window(w=%u,h=%u)\n", w, h);
     glClearColor(0.0f, 0.0f, 0.5f, 0.0f);
     glMatrixMode(GL_PROJECTION);
@@ -113,7 +119,7 @@ void setupTexture()
 
 
     // Clear screen
-   	/* 
+    /*
     for(int y = 0; y < SCREEN_HEIGHT; ++y)  {
         for(int x = 0; x < SCREEN_WIDTH; ++x) {
             if (y % 2) {
@@ -127,7 +133,7 @@ void setupTexture()
             }
         }
     }
-		*/
+    	*/
 
     // Create a texture
     glTexImage2D(GL_TEXTURE_2D, 0, 3, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid*)screenData);
@@ -161,7 +167,7 @@ int gfx_opengl_expose()
 int gfx_opengl_hwscroll()
 {
 
-	int x =0, y = 0;
+    int x =0, y = 0;
 //	printf("gfx_opengl_hwscroll()\r\n");
     /* TODO: this is hardcoded for an 80x24 display and needs to be made more flexible */
 //    OGL_Rect s, d;
@@ -170,7 +176,7 @@ int gfx_opengl_hwscroll()
 //    winsurf = OGL_GetWindowSurface(window);
 //    assert(winsurf);
 
-	/*
+    /*
     s.x = 0;
     s.y = 16;
     s.w = 640;
@@ -180,21 +186,21 @@ int gfx_opengl_hwscroll()
     d.y = 0;
     d.w = 640;
     d.h = 384 - 16;
-	*/
+    */
 
     for(int y = 0; y < (SCREEN_HEIGHT - 16); y++)  {
         for(int x = 0; x < SCREEN_WIDTH; x++) {
-                screenData[y][x][0] = screenData[y+16][x][0];
-                screenData[y][x][1] = screenData[y+16][x][1];
-                screenData[y][x][2] = screenData[y+16][x][2];
+            screenData[y][x][0] = screenData[y+16][x][0];
+            screenData[y][x][1] = screenData[y+16][x][1];
+            screenData[y][x][2] = screenData[y+16][x][2];
         }
     }
 
     for(int y = (SCREEN_HEIGHT-16); y < (SCREEN_HEIGHT); y++)  {
         for(int x = 0; x < SCREEN_WIDTH; x++) {
-                screenData[y][x][0] = 0;
-                screenData[y][x][1] = 0; 
-                screenData[y][x][2] = 0;
+            screenData[y][x][0] = 0;
+            screenData[y][x][1] = 0;
+            screenData[y][x][2] = 0;
         }
     }
 
@@ -257,10 +263,10 @@ int gfx_opengl_main(uint16_t xsize, uint16_t ysize, char *WindowTitle)
     int posY = 200;
     int sizeX = xsize;
     int sizeY =  ysize;
-		int argc = 0;
-		char *argv[] = { NULL };
+    int argc = 0;
+    char *argv[] = { NULL };
     glutInit(&argc, argv);
-		//glutInit(0, NULL);
+    //glutInit(0, NULL);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
 
     display_width = SCREEN_WIDTH * modifier;
