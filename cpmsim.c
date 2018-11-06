@@ -63,6 +63,7 @@
 #include <ctype.h>
 #include <time.h>
 #include <signal.h>
+#include <pthread.h>
 #define __USE_GNU
 #include <unistd.h>
 #include <stdbool.h>
@@ -206,6 +207,9 @@ BitmapFont *myfont;
 #define O_BINARY	0
 struct termios oldattr;
 #endif
+
+pthread_t graphics_thread;
+void sysbus_rungraphics();
 
 #ifndef __MINGW__
 int kbhit(void)
@@ -913,15 +917,18 @@ int main(int argc, char* argv[])
             {
             case 'z':
                 /* opengl graphics enabled */
+                opengl_enable = true;
+                /*
                 printf("Enabling OpenGL backend ...\r\n");
                 opengl_enable = true;
                 myfont = bmf_load(filename);
 
                 if (!myfont) {
-                    perror("bmf_load");
-                    exit(1);
+                perror("bmf_load");
+                exit(1);
                 }
                 gfx_opengl_main(640, 384, "MyAmazingWindowTitle");
+                */
                 break;
             case 's':
                 srecord = 1;
@@ -999,42 +1006,22 @@ int main(int argc, char* argv[])
 
 
     if (opengl_enable) {
-        /*
         printf("Enabling OpenGL backend ...\r\n");
         opengl_enable = true;
         myfont = bmf_load(filename);
 
         if (!myfont) {
-        perror("bmf_load");
-        exit(1);
+            perror("bmf_load");
+            exit(1);
         }
-        gfx_opengl_main(640, 384, "MyAmazingWindowTitle");
-        */
 
-    } else {
+        pthread_create( &graphics_thread, NULL, sysbus_rungraphics, NULL);
+    }
 
-        while(1)
-        {
-					execute_m68k_loop();
-					/*
-            if(g_trace)
-            {
-                struct timespec t;
 
-                t.tv_sec = 0;
-                t.tv_nsec = 1000000;
-
-                trace( m68k_get_reg(NULL, M68K_REG_PC));
-                nanosleep(&t, NULL);
-            }
-
-            m68k_execute(g_trace ? 1 : 10000); // execute 10,000 MC68000 instructions
-
-            output_device_update();
-            input_device_update();
-            nmi_device_update();
-						*/
-        }
+    while(1)
+    {
+        execute_m68k_loop();
     }
 
     return 0;
@@ -1043,22 +1030,31 @@ int main(int argc, char* argv[])
 void execute_m68k_loop()
 {
 
-       if(g_trace)
-            {
-                struct timespec t;
+    if(g_trace)
+    {
+        struct timespec t;
 
-                t.tv_sec = 0;
-                t.tv_nsec = 1000000;
-                
-                trace( m68k_get_reg(NULL, M68K_REG_PC));
-                nanosleep(&t, NULL);
-            }
+        t.tv_sec = 0;
+        t.tv_nsec = 1000000;
 
-            m68k_execute(g_trace ? 1 : 10000); // execute 10,000 MC68000 instructions
+        trace( m68k_get_reg(NULL, M68K_REG_PC));
+        nanosleep(&t, NULL);
+    }
 
-            output_device_update();
-            input_device_update();
-            nmi_device_update();
+    m68k_execute(g_trace ? 1 : 10000); // execute 10,000 MC68000 instructions
+
+    output_device_update();
+    input_device_update();
+    nmi_device_update();
 
 
+}
+
+void sysbus_rungraphics()
+{
+
+    printf("sysbus_rungraphics()\r\n");
+    fflush(NULL);
+    gfx_opengl_main(640, 384, "MyAmazingWindowTitle");
+    while (1) { }
 }

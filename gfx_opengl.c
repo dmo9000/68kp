@@ -64,23 +64,6 @@ void updateTexture()
 
 void display()
 {
-		     if(g_trace)
-            {
-                struct timespec t;
-
-                t.tv_sec = 0;
-                t.tv_nsec = 1000000;
-
-                trace( m68k_get_reg(NULL, M68K_REG_PC));
-                nanosleep(&t, NULL);
-            }
-
-            m68k_execute(g_trace ? 1 : 10000); // execute 10,000 MC68000 instructions
-
-            output_device_update();
-            input_device_update();
-            nmi_device_update();
-	
     glClear(GL_COLOR_BUFFER_BIT);
     updateTexture();
     glutSwapBuffers();
