@@ -26,14 +26,28 @@ extern int g_trace;
 typedef unsigned char u8;
 u8 screenData[SCREEN_HEIGHT][SCREEN_WIDTH][3];
 int gfx_opengl_drawglyph(BitmapFont *font, uint16_t px, uint16_t py, uint8_t glyph, uint8_t fg, uint8_t bg, uint8_t attr);
-char *p = "HELLO WORLD THIS IS YOUR CAPTAIN SPEAKING PT2, PLEASE STANDBY";
+//char *p = "HELLO WORLD THIS IS YOUR CAPTAIN SPEAKING PT2, PLEASE STANDBY";
 extern BitmapFont *myfont;
 
 void output_character(char c)
 {   
     int i = 0, j = 0;
     static int cx=0, cy=0;
-    
+		//printf("output character = %c\r\n", c);
+
+
+		if (c == '\r') {
+			cy++;
+			return;
+			}
+
+		if (c == '\n') {
+			cx = 0;
+			return;
+			}
+
+		assert (cy < 25);
+
     gfx_opengl_drawglyph(myfont, cx, cy, c, 7, 0, 0);
     cx++;
     if (cx == 80) {
@@ -45,10 +59,12 @@ void output_character(char c)
 void updateTexture()
 {
 
+		/*
     while (p[0] != 0) {
         output_character(p[0]);
         p++;
     }
+		*/
     glTexSubImage2D(GL_TEXTURE_2D, 0,0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid*)screenData);
     glBegin( GL_QUADS );
     glTexCoord2d(0.0, 0.0);
@@ -92,6 +108,7 @@ void setupTexture()
 
 
     // Clear screen
+   	/* 
     for(int y = 0; y < SCREEN_HEIGHT; ++y)  {
         for(int x = 0; x < SCREEN_WIDTH; ++x) {
             if (y % 2) {
@@ -105,6 +122,7 @@ void setupTexture()
             }
         }
     }
+		*/
 
     // Create a texture
     glTexImage2D(GL_TEXTURE_2D, 0, 3, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid*)screenData);

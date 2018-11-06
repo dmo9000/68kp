@@ -191,6 +191,7 @@ unsigned char g_ramdisk[RAMDISK_SIZE];
 unsigned int g_fc;       /* Current function code from CPU */
 
 BitmapFont *myfont;
+bool opengl_enable = false;
 
 /* OS-dependant code to get a character from the user.
  */
@@ -383,6 +384,12 @@ void MC6850_data_write(unsigned int value)
     putchar(value);
     fflush(stdout);
 #endif
+
+if (opengl_enable) {
+	/* send character to the opengl driver */
+		output_character(value);
+	}
+
 
     if((g_MC6850_control & 0x60) == 0x20)   // transmit interupt enabled?
     {
@@ -895,7 +902,7 @@ void load_boot_track(void)
 /* The main loop */
 int main(int argc, char* argv[])
 {
-    bool opengl_enable = false;
+    //bool opengl_enable = false;
     /* select bitmap font if we are going to render */
     char *filename = NULL;
     filename = "bmf/8x8.bmf";
@@ -1007,7 +1014,6 @@ int main(int argc, char* argv[])
 
     if (opengl_enable) {
         printf("Enabling OpenGL backend ...\r\n");
-        opengl_enable = true;
         myfont = bmf_load(filename);
 
         if (!myfont) {
