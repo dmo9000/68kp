@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 #include <assert.h>
 #include "rawfont.h"
 #include "ansicanvas.h"
@@ -14,9 +15,104 @@
 #define SCREEN_WIDTH    640
 #define SCREEN_HEIGHT   384
 
+int display_width = 0;
+int display_height = 0;
+
 
 typedef unsigned char u8;
 u8 screenData[SCREEN_HEIGHT][SCREEN_WIDTH][3];
+int gfx_opengl_drawglyph(BitmapFont *font, uint16_t px, uint16_t py, uint8_t glyph, uint8_t fg, uint8_t bg, uint8_t attr);
+char *p = "HELLO WORLD THIS IS YOUR CAPTAIN SPEAKING PT2, PLEASE STANDBY";
+extern BitmapFont *myfont;
+
+void output_character(char c)
+{   
+    int i = 0, j = 0;
+    static int cx=0, cy=0;
+    
+    gfx_opengl_drawglyph(myfont, cx, cy, c, 7, 0, 0);
+    cx++;
+    if (cx == 80) {
+        cx = 0;
+        cy ++;
+    }
+}
+
+void updateTexture()
+{
+    while (p[0] != 0) {
+        output_character(p[0]);
+        p++;
+    }
+    glTexSubImage2D(GL_TEXTURE_2D, 0,0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid*)screenData);
+    glBegin( GL_QUADS );
+    glTexCoord2d(0.0, 0.0);
+    glVertex2d(0.0,       0.0);
+    glTexCoord2d(1.0, 0.0);
+    glVertex2d(display_width, 0.0);
+    glTexCoord2d(1.0, 1.0);
+    glVertex2d(display_width, display_height);
+    glTexCoord2d(0.0, 1.0);
+    glVertex2d(0.0,       display_height);
+    glEnd();
+}
+
+
+void display()
+{
+    glClear(GL_COLOR_BUFFER_BIT);
+    
+    updateTexture();
+    glutSwapBuffers();
+}
+
+void reshape_window(GLsizei w, GLsizei h)
+{
+    printf("reshape_window()\n");
+    glClearColor(0.0f, 0.0f, 0.5f, 0.0f);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(0, w, h, 0);
+    glMatrixMode(GL_MODELVIEW);
+    glViewport(0, 0, w, h);
+    display_width = w;
+    display_height = h;
+}
+
+
+// Setup Texture
+void setupTexture()
+{
+
+
+    // Clear screen
+    for(int y = 0; y < SCREEN_HEIGHT; ++y)  {
+        for(int x = 0; x < SCREEN_WIDTH; ++x) {
+            if (y % 2) {
+                screenData[y][x][0] = 255;
+                screenData[y][x][1] = 0;
+                screenData[y][x][2] = 0;
+            } else {
+                screenData[y][x][0] = 0;
+                screenData[y][x][1] = 255;
+                screenData[y][x][2] = 0;
+            }
+        }
+    }
+
+    // Create a texture
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid*)screenData);
+
+    // Set up the texture
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+
+    // Enable textures
+    glEnable(GL_TEXTURE_2D);
+}
+
 
 void setTexturePixel(int x, int y, u8 r, u8 g, u8 b)
 {
@@ -112,40 +208,24 @@ int gfx_opengl_main(uint16_t xsize, uint16_t ysize, char *WindowTitle)
     int posY = 200;
     int sizeX = xsize;
     int sizeY =  ysize;
+		int argc = 0;
+		char *argv[] = { NULL };
+    glutInit(&argc, argv);
+		//glutInit(0, NULL);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
 
-//    if ( OGL_Init( OGL_INIT_EVERYTHING ) != 0 )
-//    {
-//        // Something failed, print error and exit.
-//        printf(" Failed to initialize OGL : %s\n", OGL_GetError());
-//       return -1;
-//    }
-//
-//    window = OGL_CreateWindow(WindowTitle, posX, posY, sizeX, sizeY, 0 );
-//    tmpsurface = OGL_CreateRGBSurface(0, 640, 384, 24, 0, 0, 0, 0);
-//    assert(tmpsurface);
+    glutInitWindowSize(display_width, display_height);
+//    glutInitWindowPosition(320, 320);
+    glutCreateWindow("68K");
 
-    /*
-    if ( window == NULL )
-    {
-        printf( "Failed to create window : %s", OGL_GetError());
-        return -1;
-    }
-    */
+    glutDisplayFunc(display);
+    glutIdleFunc(display);
+    glutReshapeFunc(reshape_window);
 
-//    renderer = OGL_CreateRenderer( window, -1, OGL_RENDERER_ACCELERATED );
+    setupTexture();
 
-    /*
-        if ( renderer == NULL )
-        {
-            printf( "Failed to create renderer : %s", OGL_GetError());
-            return -1;
-        }
-    */
+    glutMainLoop();
 
-//    OGL_RenderSetLogicalSize( renderer, sizeX, sizeY );
-//    OGL_SetRenderDrawColor( renderer, 0, 0, 0, 255 );
-//    OGL_RenderClear( renderer );
-//    OGL_RenderPresent( renderer);
     return 0;
 }
 

@@ -921,6 +921,7 @@ int main(int argc, char* argv[])
                     perror("bmf_load");
                     exit(1);
                 }
+								gfx_opengl_main(640, 384, "MyAmazingWindowTitle");
                 break;
             case 's':
                 srecord = 1;
