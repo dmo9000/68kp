@@ -6,6 +6,7 @@
 #include <assert.h>
 #include "rawfont.h"
 #include "ansicanvas.h"
+#include "m68k.h"
 
 //OGL_Window* window;
 //OGL_Renderer* renderer;
@@ -19,6 +20,7 @@ int display_width = 0;
 int display_height = 0;
 int modifier = 2;
 
+extern int g_trace;
 
 typedef unsigned char u8;
 u8 screenData[SCREEN_HEIGHT][SCREEN_WIDTH][3];
@@ -41,6 +43,7 @@ void output_character(char c)
 
 void updateTexture()
 {
+
     while (p[0] != 0) {
         output_character(p[0]);
         p++;
@@ -61,8 +64,24 @@ void updateTexture()
 
 void display()
 {
+		     if(g_trace)
+            {
+                struct timespec t;
+
+                t.tv_sec = 0;
+                t.tv_nsec = 1000000;
+
+                trace( m68k_get_reg(NULL, M68K_REG_PC));
+                nanosleep(&t, NULL);
+            }
+
+            m68k_execute(g_trace ? 1 : 10000); // execute 10,000 MC68000 instructions
+
+            output_device_update();
+            input_device_update();
+            nmi_device_update();
+	
     glClear(GL_COLOR_BUFFER_BIT);
-    
     updateTexture();
     glutSwapBuffers();
 }
