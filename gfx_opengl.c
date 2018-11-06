@@ -68,7 +68,7 @@ void display()
 
 void reshape_window(GLsizei w, GLsizei h)
 {
-    printf("reshape_window()\n");
+    printf("reshape_window(w=%u,h=%u)\n", w, h);
     glClearColor(0.0f, 0.0f, 0.5f, 0.0f);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
