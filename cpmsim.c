@@ -892,7 +892,7 @@ void load_boot_track(void)
 int main(int argc, char* argv[])
 {
     bool opengl_enable = false;
-		/* select bitmap font if we are going to render */
+    /* select bitmap font if we are going to render */
     char *filename = NULL;
     filename = "bmf/8x8.bmf";
     int c;
@@ -913,7 +913,7 @@ int main(int argc, char* argv[])
             {
             case 'z':
                 /* opengl graphics enabled */
-								printf("Enabling OpenGL backend ...\r\n");
+                printf("Enabling OpenGL backend ...\r\n");
                 opengl_enable = true;
                 myfont = bmf_load(filename);
 
@@ -921,7 +921,7 @@ int main(int argc, char* argv[])
                     perror("bmf_load");
                     exit(1);
                 }
-								gfx_opengl_main(640, 384, "MyAmazingWindowTitle");
+                gfx_opengl_main(640, 384, "MyAmazingWindowTitle");
                 break;
             case 's':
                 srecord = 1;
@@ -997,24 +997,42 @@ int main(int argc, char* argv[])
     MC6850_reset();
     nmi_device_reset();
 
-    while(1)
-    {
-        if(g_trace)
-        {
-            struct timespec t;
 
-            t.tv_sec = 0;
-            t.tv_nsec = 1000000;
+    if (opengl_enable) {
+        /*
+        printf("Enabling OpenGL backend ...\r\n");
+        opengl_enable = true;
+        myfont = bmf_load(filename);
 
-            trace( m68k_get_reg(NULL, M68K_REG_PC));
-            nanosleep(&t, NULL);
+        if (!myfont) {
+        perror("bmf_load");
+        exit(1);
         }
+        gfx_opengl_main(640, 384, "MyAmazingWindowTitle");
+        */
 
-        m68k_execute(g_trace ? 1 : 10000); // execute 10,000 MC68000 instructions
+    } else {
 
-        output_device_update();
-        input_device_update();
-        nmi_device_update();
+        while(1)
+        {
+            if(g_trace)
+            {
+                struct timespec t;
+
+                t.tv_sec = 0;
+                t.tv_nsec = 1000000;
+
+                trace( m68k_get_reg(NULL, M68K_REG_PC));
+                nanosleep(&t, NULL);
+            }
+
+            m68k_execute(g_trace ? 1 : 10000); // execute 10,000 MC68000 instructions
+
+            output_device_update();
+            input_device_update();
+            nmi_device_update();
+        }
     }
+
     return 0;
 }
