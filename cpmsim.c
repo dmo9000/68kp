@@ -220,8 +220,7 @@ int kbhit(void)
 #else
 int kbhit(void)
 {
-		//printf("kbhit()\n");
-		return (0);	
+		return _kbhit();
 }
 #endif
 
@@ -301,6 +300,7 @@ void input_device_update(void)
 {
     if(kbhit())
     {
+				printf("[KBHIT!]\n");
         g_MC6850_status |= 1;
         if((g_MC6850_control & 0x80) && !(g_MC6850_status & 0x80))
         {
@@ -537,6 +537,7 @@ unsigned int cpu_read_byte(unsigned int address)
     switch(address)
     {
     case MC6850_DATA:
+				printf("MC6850_data_read()\n");
         return MC6850_data_read();
     case MC6850_STAT:
         return MC6850_status_read();
@@ -581,7 +582,7 @@ void cpu_write_byte(unsigned int address, unsigned int value)
     switch(address)
     {
     case MC6850_DATA:
-        // printf("MC6580_DATA(%x, %x, '%c')\r\n", address, value, value);
+        //printf("MC6580_DATA(%x, %x, '%c')\r\n", address, value, value);
         MC6850_data_write(value&0xff);
         return;
     case MC6850_STAT:
