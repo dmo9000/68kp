@@ -369,6 +369,7 @@ void MC6850_data_write(unsigned int value)
 
 //    write(STDOUT_FILENO, &ch, 1);
       putc(value, stdout);
+			fflush(stdout);
 
     if((g_MC6850_control & 0x60) == 0x20)   // transmit interupt enabled?
     {
