@@ -370,10 +370,12 @@ void MC6850_data_write(unsigned int value)
     ch &= 0x7f;
 #endif
 
-//    write(STDOUT_FILENO, &ch, 1);
-      //putc(value, stdout);
+#ifndef __MINGW__
+	    write(STDOUT_FILENO, &ch, 1);
+#else
      	putchar(value); 
 			fflush(stdout);
+#endif 
 
     if((g_MC6850_control & 0x60) == 0x20)   // transmit interupt enabled?
     {
