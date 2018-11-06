@@ -46,7 +46,11 @@ void output_character(char c)
 			return;
 			}
 
-		assert (cy < 25);
+		if (cy > 23 ) {
+			/* hardware scroll required */
+			cy = 23;
+			}
+		//assert (cy < 25);
 
     gfx_opengl_drawglyph(myfont, cx, cy, c, 7, 0, 0);
     cx++;
