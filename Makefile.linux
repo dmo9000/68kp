@@ -3,7 +3,7 @@ WARNINGS = -Wall
 CFLAGS = $(WARNINGS) -g -ggdb -O2 -c -Iobj -I.
 LFLAGS = $(WARNINGS) -lGL -lGLU -lglut -lm
 
-OGL_OBJS=gfx_opengl.o ansicanvas.o ansiraster.o utf8.o
+OGL_OBJS=gfx_opengl.o ansicanvas.o ansiraster.o utf8.o rawfont.o
 
 
 all: obj cpmsim

@@ -2,3 +2,4 @@ cpmsim
 cpmsim.exe
 m68kdasm.o
 obj
+*.o

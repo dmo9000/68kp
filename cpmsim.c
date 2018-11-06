@@ -65,9 +65,11 @@
 #include <signal.h>
 #define __USE_GNU
 #include <unistd.h>
+#include <stdbool.h>
 #include <errno.h>
 #include "sim.h"
 #include "m68k.h"
+#include "rawfont.h"
 
 //#define FIGFORTH
 
@@ -187,6 +189,7 @@ unsigned char g_ramdisk[RAMDISK_SIZE];
 
 unsigned int g_fc;       /* Current function code from CPU */
 
+BitmapFont *myfont;
 
 /* OS-dependant code to get a character from the user.
  */
@@ -888,6 +891,10 @@ void load_boot_track(void)
 /* The main loop */
 int main(int argc, char* argv[])
 {
+    bool opengl_enable = false;
+		/* select bitmap font if we are going to render */
+    char *filename = NULL;
+    filename = "bmf/8x8.bmf";
     int c;
 #ifndef __MINGW__
     struct termios newattr;
@@ -895,7 +902,7 @@ int main(int argc, char* argv[])
 
     init_disks();
 
-    while((c = getopt(argc, argv, "sta:b:c:d:e:f:g:h:i:j:k:l:n:o:p:")) != -1)
+    while((c = getopt(argc, argv, "stza:b:c:d:e:f:g:h:i:j:k:l:n:o:p:")) != -1)
     {
         if(c >= 'a' && c <= 'p') {
             open_disk(c-'a', optarg, O_RDWR|O_BINARY);
@@ -904,6 +911,17 @@ int main(int argc, char* argv[])
         {
             switch(c)
             {
+            case 'z':
+                /* opengl graphics enabled */
+								printf("Enabling OpenGL backend ...\r\n");
+                opengl_enable = true;
+                myfont = bmf_load(filename);
+
+                if (!myfont) {
+                    perror("bmf_load");
+                    exit(1);
+                }
+                break;
             case 's':
                 srecord = 1;
                 break;
