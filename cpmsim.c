@@ -323,7 +323,7 @@ unsigned int MC6850_data_read(void)
 
 #ifndef __MINGW__
     if(read(STDIN_FILENO, &ch, 1) == 1) {
-				printf("read == 1\r\n");
+				//printf("read == 1\r\n");
         return ch;
 				} else {
         return -1;
