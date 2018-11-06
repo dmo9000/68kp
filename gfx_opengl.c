@@ -48,6 +48,7 @@ void output_character(char c)
 
 		if (cy > 23 ) {
 			/* hardware scroll required */
+			gfx_opengl_hwscroll();
 			cy = 23;
 			}
 		//assert (cy < 25);
@@ -160,6 +161,8 @@ int gfx_opengl_expose()
 int gfx_opengl_hwscroll()
 {
 
+	int x =0, y = 0;
+//	printf("gfx_opengl_hwscroll()\r\n");
     /* TODO: this is hardcoded for an 80x24 display and needs to be made more flexible */
 //    OGL_Rect s, d;
 //    OGL_Surface* winsurf;
@@ -167,7 +170,7 @@ int gfx_opengl_hwscroll()
 //    winsurf = OGL_GetWindowSurface(window);
 //    assert(winsurf);
 
-    /*
+	/*
     s.x = 0;
     s.y = 16;
     s.w = 640;
@@ -177,7 +180,25 @@ int gfx_opengl_hwscroll()
     d.y = 0;
     d.w = 640;
     d.h = 384 - 16;
-    */
+	*/
+
+    for(int y = 0; y < (SCREEN_HEIGHT - 16); y++)  {
+        for(int x = 0; x < SCREEN_WIDTH; x++) {
+                screenData[y][x][0] = screenData[y+16][x][0];
+                screenData[y][x][1] = screenData[y+16][x][1];
+                screenData[y][x][2] = screenData[y+16][x][2];
+        }
+    }
+
+    for(int y = (SCREEN_HEIGHT-16); y < (SCREEN_HEIGHT); y++)  {
+        for(int x = 0; x < SCREEN_WIDTH; x++) {
+                screenData[y][x][0] = 0;
+                screenData[y][x][1] = 0; 
+                screenData[y][x][2] = 0;
+        }
+    }
+
+//    assert(!OGL_BlitSurface(winsurf, &s, tmpsurface, &d));
 
 //    assert(!OGL_BlitSurface(winsurf, &s, tmpsurface, &d));
 //    assert(!OGL_BlitSurface(tmpsurface, &d, winsurf, &d));
