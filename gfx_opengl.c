@@ -17,6 +17,7 @@
 
 int display_width = 0;
 int display_height = 0;
+int modifier = 2;
 
 
 typedef unsigned char u8;
@@ -68,6 +69,8 @@ void display()
 
 void reshape_window(GLsizei w, GLsizei h)
 {
+		//w = SCREEN_WIDTH;
+		//h = SCREEN_HEIGHT;
     printf("reshape_window(w=%u,h=%u)\n", w, h);
     glClearColor(0.0f, 0.0f, 0.5f, 0.0f);
     glMatrixMode(GL_PROJECTION);
@@ -213,6 +216,9 @@ int gfx_opengl_main(uint16_t xsize, uint16_t ysize, char *WindowTitle)
     glutInit(&argc, argv);
 		//glutInit(0, NULL);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
+
+    display_width = SCREEN_WIDTH * modifier;
+    display_height = SCREEN_HEIGHT * modifier;
 
     glutInitWindowSize(display_width, display_height);
 //    glutInitWindowPosition(320, 320);
