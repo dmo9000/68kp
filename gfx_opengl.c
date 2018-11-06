@@ -29,6 +29,11 @@ int gfx_opengl_drawglyph(BitmapFont *font, uint16_t px, uint16_t py, uint8_t gly
 //char *p = "HELLO WORLD THIS IS YOUR CAPTAIN SPEAKING PT2, PLEASE STANDBY";
 extern BitmapFont *myfont;
 
+#define MAX_KBBUF_LEN	256
+unsigned char kbbuf[MAX_KBBUF_LEN];
+volatile uint8_t kbbuf_len = 0;
+
+
 void output_character(char c)
 {
     int i = 0, j = 0;
@@ -255,6 +260,47 @@ int gfx_opengl_drawglyph(BitmapFont *font, uint16_t px, uint16_t py, uint8_t gly
     return 0;
 }
 
+int input_character()
+{
+
+    uint8_t ch = 0;
+    int i = 0;
+    while (kbbuf_len == 0) {
+    }
+    ch= kbbuf[0];
+    for (i = 0; i < kbbuf_len-1; i++) {
+        kbbuf[i] = kbbuf[i+1];
+    }
+    kbbuf_len --;
+    return ch;
+
+}
+
+
+void process_Normal_Keys(int key, int x, int y)
+{
+    //printf("process_Normal_Keys()\r\n");
+
+    switch (key)
+    {
+    /*
+    *        case 27 :      break;
+    *               case 100 : printf("GLUT_KEY_LEFT %d\n",key);   break;
+    *                      case 102: printf("GLUT_KEY_RIGHT %d\n",key);  ;  break;
+    *                             case 101   : printf("GLUT_KEY_UP %d\n",key);  ;  break;
+    *                                    case 103 : printf("GLUT_KEY_DOWN %d\n",key);  ;  break;
+    *                                          */
+    default:
+        //printf("GLUT_KEY(%d)\r\n", key);
+        //output_character(key);
+        assert(kbbuf_len < MAX_KBBUF_LEN) ;
+        kbbuf[kbbuf_len] = key;
+        kbbuf_len++;
+        //printf("keyboard buffer len is now %u\r", kbbuf_len);
+        break;
+    }
+
+}
 
 
 int gfx_opengl_main(uint16_t xsize, uint16_t ysize, char *WindowTitle)
@@ -279,6 +325,7 @@ int gfx_opengl_main(uint16_t xsize, uint16_t ysize, char *WindowTitle)
     glutDisplayFunc(display);
     glutIdleFunc(display);
     glutReshapeFunc(reshape_window);
+    glutKeyboardFunc( process_Normal_Keys );
 
     setupTexture();
 

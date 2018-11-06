@@ -331,21 +331,33 @@ unsigned int MC6850_data_read(void)
     g_MC6850_status &= ~0x81;          // clear data ready and interrupt flag
 
 #ifndef __MINGW__
+    /*
     if(read(STDIN_FILENO, &ch, 1) == 1) {
-        //printf("read == 1\r\n");
-        return ch;
+    //printf("read == 1\r\n");
+    return ch;
     } else {
-        return -1;
+    return -1;
+    }
+    */
+    if (opengl_enable) {
+        ch = input_character();
+    } else {
+        if(read(STDIN_FILENO, &ch, 1) == 1) {
+            //printf("read == 1\r\n");
+            return ch;
+        } else {
+            return -1;
+        }
     }
 #else
-    ch = _getch();
-
+    //ch = _getch();
+    if (opengl_enable) {
+        ch = input_character();
+    } else {
+        ch = _getch();
+    }
+    //printf("MINGW - NOINPUT\r\n");
     if (ch == 0 || ch == -1) return -1;
-    /*
-    if (ch == '\r') {
-    	printf("\r\n");
-    	}
-    */
 
     return ch;
 #endif
@@ -379,17 +391,20 @@ void MC6850_data_write(unsigned int value)
 #endif
 
 #ifndef __MINGW__
-    write(STDOUT_FILENO, &ch, 1);
+    if (!opengl_enable) {
+        write(STDOUT_FILENO, &ch, 1);
+    }
 #else
-    putchar(value);
-    fflush(stdout);
+    if (!opengl_enable) {
+        putchar(value);
+        fflush(stdout);
+    }
 #endif
 
-if (opengl_enable) {
-	/* send character to the opengl driver */
-		output_character(value);
-	}
-
+    if (opengl_enable) {
+        /* send character to the opengl driver */
+        output_character(value);
+    }
 
     if((g_MC6850_control & 0x60) == 0x20)   // transmit interupt enabled?
     {
