@@ -221,7 +221,7 @@ int kbhit(void)
 #else
 int kbhit(void)
 {
-		return _kbhit();
+    return _kbhit();
 }
 #endif
 
@@ -324,22 +324,22 @@ unsigned int MC6850_data_read(void)
 
 #ifndef __MINGW__
     if(read(STDIN_FILENO, &ch, 1) == 1) {
-				//printf("read == 1\r\n");
+        //printf("read == 1\r\n");
         return ch;
-				} else {
+    } else {
         return -1;
-				}
+    }
 #else
-		ch = _getch();
+    ch = _getch();
 
-		if (ch == 0 || ch == -1) return -1;
-		/*
-		if (ch == '\r') {
-			printf("\r\n");
-			}
-		*/	
+    if (ch == 0 || ch == -1) return -1;
+    /*
+    if (ch == '\r') {
+    	printf("\r\n");
+    	}
+    */
 
-		return ch;
+    return ch;
 #endif
 }
 
@@ -371,11 +371,11 @@ void MC6850_data_write(unsigned int value)
 #endif
 
 #ifndef __MINGW__
-	    write(STDOUT_FILENO, &ch, 1);
+    write(STDOUT_FILENO, &ch, 1);
 #else
-     	putchar(value); 
-			fflush(stdout);
-#endif 
+    putchar(value);
+    fflush(stdout);
+#endif
 
     if((g_MC6850_control & 0x60) == 0x20)   // transmit interupt enabled?
     {
@@ -421,13 +421,13 @@ void disk_read(int sector)
 #endif
 
     fd = g_disk_fds[g_disk_drive];
-    
+
     /* bugger, no way to return a disk read error at this point in time */
 
     if(fd == -1) {                  // verify file is opened
         //printf("(DISK READ ERROR!)\r\n");
         return;
-        }
+    }
 
     // seek to set sector
     if(lseek(fd, sector * SEC_SIZE, SEEK_SET) != sector *SEC_SIZE)
@@ -509,9 +509,9 @@ void disk_flush(void)
         if(g_disk_fds[i] != -1) {
 #ifndef __MINGW__
             fsync(g_disk_fds[i]);
-#endif 
-						}
-					}
+#endif
+        }
+    }
 }
 
 /*
@@ -535,7 +535,7 @@ void open_disk(int fn, char *fname, mode_t flags)
         fprintf(stderr, "File %s locked\nOpening read only.\n", fname);
         g_disk_fds[fn] = open(fname, O_RDONLY||O_BINARY);
     }
-#endif 
+#endif
     g_disk_size[fn] = lseek(g_disk_fds[fn], 0, SEEK_END);
 }
 
@@ -555,7 +555,7 @@ unsigned int cpu_read_byte(unsigned int address)
     switch(address)
     {
     case MC6850_DATA:
-				//printf("MC6850_data_read()\r\n");
+        //printf("MC6850_data_read()\r\n");
         return MC6850_data_read();
     case MC6850_STAT:
         return MC6850_status_read();
@@ -964,7 +964,7 @@ int main(int argc, char* argv[])
 
 #ifndef FIGFORTH
     if(g_trace)
-    	newattr.c_lflag |= ISIG;    // uncomment to process ^C
+        newattr.c_lflag |= ISIG;    // uncomment to process ^C
 #endif
 
     newattr.c_cc[VMIN] = 1;       // block until at least one char available

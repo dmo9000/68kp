@@ -4,7 +4,7 @@ CFLAGS = $(WARNINGS) -g -ggdb -O2 -c -Iobj -D__MINGW__ -I.
 #LFLAGS = $(WARNINGS)  -lglu32 -lopengl32 -lglut  
 LFLAGS = $(WARNINGS)  
 
-
+OGL_OBJS=gfx_opengl.o ansicanvas.o ansiraster.o utf8.o
 
 all: obj cpmsim
 
@@ -21,8 +21,8 @@ clean:
 obj:
 	mkdir obj
 
-cpmsim: obj/cpmsim.o obj/m68kcpu.o obj/m68kops.o obj/m68kopac.o obj/m68kopdm.o obj/m68kopnz.o m68kdasm.o
-	$(CC) $(LFLAGS) obj/sim.o obj/m68kcpu.o obj/m68kops.o obj/m68kopac.o obj/m68kopdm.o obj/m68kopnz.o m68kdasm.o -o cpmsim
+cpmsim: obj/cpmsim.o obj/m68kcpu.o obj/m68kops.o obj/m68kopac.o obj/m68kopdm.o obj/m68kopnz.o m68kdasm.o $(OGL_OBJS)
+	$(CC) $(LFLAGS) obj/sim.o obj/m68kcpu.o obj/m68kops.o obj/m68kopac.o obj/m68kopdm.o obj/m68kopnz.o m68kdasm.o $(OGL_OBJS) -o gfx_opengl.o cpmsim
 
 obj/cpmsim.o: cpmsim.c sim.h m68k.h m68kconf.h
 	$(CC) $(CFLAGS) cpmsim.c -o obj/sim.o
