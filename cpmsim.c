@@ -200,6 +200,7 @@ unsigned int g_fc;       /* Current function code from CPU */
 
 
 #ifndef __MINGW__
+#define O_BINARY	0
 struct termios oldattr;
 #endif
 
