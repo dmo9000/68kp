@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <assert.h>
+#include <time.h>
 #include "rawfont.h"
 #include "ansicanvas.h"
 #include "m68k.h"
