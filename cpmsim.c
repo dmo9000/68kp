@@ -217,6 +217,12 @@ int kbhit(void)
 
     return select(STDIN_FILENO + 1, &rdset, NULL, NULL, &timeout);
 }
+#else
+int kbhit(void)
+{
+		//printf("kbhit()\n");
+		return (0);	
+}
 #endif
 
 void memdump(int start, int end)

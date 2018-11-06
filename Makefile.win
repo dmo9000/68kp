@@ -1,7 +1,7 @@
 CC = gcc 
 WARNINGS = -Wall
 CFLAGS = $(WARNINGS) -g -ggdb -O2 -c -Iobj -I.
-LFLAGS = $(WARNINGS)  -lglu32 -lopengl32 -lglut  
+LFLAGS = $(WARNINGS)    
 
 
 all: obj cpmsim
