@@ -321,12 +321,23 @@ unsigned int MC6850_data_read(void)
     int_controller_clear(IRQ_MC6850);
     g_MC6850_status &= ~0x81;          // clear data ready and interrupt flag
 
+#ifndef __MINGW__
     if(read(STDIN_FILENO, &ch, 1) == 1) {
 				printf("read == 1\r\n");
         return ch;
 				} else {
         return -1;
 				}
+#else
+		ch = _getch();
+
+		if (ch == 0 || ch == -1) return -1;
+		if (ch == '\r') {
+			printf("\r\n");
+			}
+
+		return ch;
+#endif
 }
 
 int MC6850_status_read()
@@ -537,7 +548,7 @@ unsigned int cpu_read_byte(unsigned int address)
     switch(address)
     {
     case MC6850_DATA:
-				printf("MC6850_data_read()\r\n");
+				//printf("MC6850_data_read()\r\n");
         return MC6850_data_read();
     case MC6850_STAT:
         return MC6850_status_read();
