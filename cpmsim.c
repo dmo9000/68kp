@@ -368,7 +368,8 @@ void MC6850_data_write(unsigned int value)
 #endif
 
 //    write(STDOUT_FILENO, &ch, 1);
-      putc(value, stdout);
+      //putc(value, stdout);
+     	putchar(value); 
 			fflush(stdout);
 
     if((g_MC6850_control & 0x60) == 0x20)   // transmit interupt enabled?
@@ -527,7 +528,7 @@ void open_disk(int fn, char *fname, mode_t flags)
     {
         close(g_disk_fds[fn]);
         fprintf(stderr, "File %s locked\nOpening read only.\n", fname);
-        g_disk_fds[fn] = open(fname, O_RDONLY);
+        g_disk_fds[fn] = open(fname, O_RDONLY||O_BINARY);
     }
 #endif 
     g_disk_size[fn] = lseek(g_disk_fds[fn], 0, SEEK_END);
@@ -770,7 +771,7 @@ void load_srecords(void)
     int i, fd;
 
 
-    if((fd = open(CPM_IMAGE, O_RDONLY)) == -1)
+    if((fd = open(CPM_IMAGE, O_RDONLY|O_BINARY)) == -1)
         exit_error("Unable to open %s", CPM_IMAGE);
 
     if((i = read(fd, g_ram, MAX_RAM+1)) == -1)
@@ -780,7 +781,7 @@ void load_srecords(void)
 
     close(fd);
 
-    if((fd = open(BIOS_IMAGE, O_RDONLY)) == -1)
+    if((fd = open(BIOS_IMAGE, O_RDONLY|O_BINARY)) == -1)
         exit_error("Unable to open %s", BIOS_IMAGE);
 
     if(read(fd, g_ram, 8) == -1)         // read initial SP and PC
@@ -892,7 +893,7 @@ int main(int argc, char* argv[])
     while((c = getopt(argc, argv, "sta:b:c:d:e:f:g:h:i:j:k:l:n:o:p:")) != -1)
     {
         if(c >= 'a' && c <= 'p') {
-            open_disk(c-'a', optarg, O_RDWR);
+            open_disk(c-'a', optarg, O_RDWR|O_BINARY);
         } else
 
         {
@@ -919,11 +920,11 @@ int main(int argc, char* argv[])
         }
     }
     if(g_disk_fds[2] == -1) {
-        open_disk(2, DISKC_FILENAME, O_RDWR);
+        open_disk(2, DISKC_FILENAME, O_RDWR|O_BINARY);
     }
 
     if(g_disk_fds[4] == -1) {
-        open_disk(4, DISKE_FILENAME, O_RDWR);
+        open_disk(4, DISKE_FILENAME, O_RDWR|O_BINARY);
     }
 
     if(optind != argc)
