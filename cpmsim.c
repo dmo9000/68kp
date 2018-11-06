@@ -333,9 +333,11 @@ unsigned int MC6850_data_read(void)
 		ch = _getch();
 
 		if (ch == 0 || ch == -1) return -1;
+		/*
 		if (ch == '\r') {
 			printf("\r\n");
 			}
+		*/	
 
 		return ch;
 #endif
