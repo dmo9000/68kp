@@ -191,13 +191,19 @@ unsigned int g_fc;       /* Current function code from CPU */
 /* OS-dependant code to get a character from the user.
  */
 
+#ifndef __MINGW__
 #include <termios.h>
+#endif
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/time.h>
 
-struct termios oldattr;
 
+#ifndef __MINGW__
+struct termios oldattr;
+#endif
+
+#ifndef __MINGW__
 int kbhit(void)
 {
     struct timeval timeout;
@@ -205,11 +211,13 @@ int kbhit(void)
 
     FD_ZERO(&rdset);
     FD_SET(STDIN_FILENO, &rdset);
+
     timeout.tv_sec  = 0;
     timeout.tv_usec = 0;
 
     return select(STDIN_FILENO + 1, &rdset, NULL, NULL, &timeout);
 }
+#endif
 
 void memdump(int start, int end)
 {
@@ -227,14 +235,18 @@ void termination_handler(int signum)
 {
     int i;
 
+#ifndef __MINGW__
     tcsetattr(STDIN_FILENO, TCSANOW, &oldattr);  // restore terminal settings
+#endif
 
     for(i = 0; i < 16; i++)
     {
         if(g_disk_fds[i] != -1)
         {
             lseek(g_disk_fds[i], 0, 0);
+#ifndef __MINGW__
             lockf(g_disk_fds[i], F_ULOCK, 0);
+#endif
             close(g_disk_fds[i]);
         }
     }
@@ -248,7 +260,9 @@ void exit_error(char* fmt, ...)
 {
     va_list args;
 
+#ifndef __MINGW__
     tcsetattr(STDIN_FILENO, TCSANOW, &oldattr);  // restore terminal settings
+#endif
 
 
     va_start(args, fmt);
@@ -467,9 +481,13 @@ void disk_flush(void)
 {
     int i;
 
-    for(i = 0; i < 16; i++)
-        if(g_disk_fds[i] != -1)
+    for(i = 0; i < 16; i++) {
+        if(g_disk_fds[i] != -1) {
+#ifndef __MINGW__
             fsync(g_disk_fds[i]);
+#endif 
+						}
+					}
 }
 
 /*
@@ -486,12 +504,14 @@ void open_disk(int fn, char *fname, mode_t flags)
         return;
     }
     lseek(g_disk_fds[fn], 0, 0);         // make sure at start of file
+#ifndef __MINGW__
     if(lockf(g_disk_fds[fn], F_TLOCK, 0) == -1)
     {
         close(g_disk_fds[fn]);
         fprintf(stderr, "File %s locked\nOpening read only.\n", fname);
         g_disk_fds[fn] = open(fname, O_RDONLY);
     }
+#endif 
     g_disk_size[fn] = lseek(g_disk_fds[fn], 0, SEEK_END);
 }
 
@@ -844,7 +864,9 @@ void load_boot_track(void)
 int main(int argc, char* argv[])
 {
     int c;
+#ifndef __MINGW__
     struct termios newattr;
+#endif
 
     init_disks();
 
@@ -894,6 +916,7 @@ int main(int argc, char* argv[])
         load_boot_track();
 
 
+#ifndef __MINGW__
     /*
       Install a handler for various termination events so that we have the
       opportunity to write the simulated file systems back. Plus clean up
@@ -916,12 +939,13 @@ int main(int argc, char* argv[])
 
 #ifndef FIGFORTH
     if(g_trace)
+    	newattr.c_lflag |= ISIG;    // uncomment to process ^C
 #endif
-        newattr.c_lflag |= ISIG;    // uncomment to process ^C
 
     newattr.c_cc[VMIN] = 1;       // block until at least one char available
     newattr.c_cc[VTIME] = 0;
     tcsetattr(STDIN_FILENO, TCSANOW, &newattr);
+#endif
 
     m68k_init();
     m68k_set_cpu_type(M68K_CPU_TYPE_68000);
