@@ -2,8 +2,8 @@
 
 #define __RAWFONT_H__
 
-#include <stdint.h>
-
+typedef unsigned char uint8_t;
+typedef unsigned short uint16_t;
 
 struct bitmapfontheader {
     unsigned char magic[3];
