@@ -164,6 +164,7 @@ int gfx_opengl_hwscroll()
 {
 
     int x =0, y = 0;
+		char *src_addr, *dest_addr = NULL;
 //	printf("gfx_opengl_hwscroll()\r\n");
     /* TODO: this is hardcoded for an 80x24 display and needs to be made more flexible */
 //    OGL_Rect s, d;
@@ -183,6 +184,27 @@ int gfx_opengl_hwscroll()
     d.w = 640;
     d.h = 384 - 16;
     */
+
+    src_addr = screenData;
+    dest_addr = screenData;
+    src_addr += (y * gfx_opengl_width * 3) + (x * 3);
+    dest_addr += ((y+16) * gfx_opengl_width * 3) + (x * 3);
+
+		for (int y = 0; y < gfx_opengl_height - 16; y++) {
+            //for(int x = 0; x < gfx_opengl_width; x++) {
+    				src_addr = screenData;
+				    dest_addr = screenData;
+				    src_addr += ((y+16) * gfx_opengl_width * 3); //+ (x * 3);
+				    dest_addr += (y * gfx_opengl_width * 3); // + (x * 3);
+						memcpy(dest_addr, src_addr, gfx_opengl_width *3);
+						//}
+		}	
+
+        for(int y = (gfx_opengl_height-16); y < (gfx_opengl_height); y++)  {
+				    dest_addr = screenData;
+				    dest_addr += (y * gfx_opengl_width * 3); // + (x * 3);
+						memset(dest_addr, 0, gfx_opengl_width *3);
+						}
 
     /*
         for(int y = 0; y < (SCREEN_HEIGHT - 16); y++)  {

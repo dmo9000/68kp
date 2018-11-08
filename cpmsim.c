@@ -1036,7 +1036,10 @@ int main(int argc, char* argv[])
             exit(1);
         }
 
+
+			 grx_opengl_setdimensions(640, 384);
         pthread_create( &graphics_thread, NULL, sysbus_rungraphics, NULL);
+				sleep(1);
     }
 
 
@@ -1071,11 +1074,13 @@ void execute_m68k_loop()
 
 }
 
+
 void sysbus_rungraphics()
 {
 
     printf("sysbus_rungraphics()\r\n");
     fflush(NULL);
     gfx_opengl_main(640, 384, "MyAmazingWindowTitle");
+    gfx_opengl_main(gfx_opengl_getwidth(), gfx_opengl_getheight(), "68K");
     while (1) { }
 }
