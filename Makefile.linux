@@ -1,6 +1,6 @@
 CC =     gcc
 WARNINGS = -Wall
-CFLAGS = $(WARNINGS) -g -ggdb -O2 -c -Iobj -I.
+CFLAGS = $(WARNINGS) -g -ggdb -O2 -c -Iobj -I. -I../ansiutils
 LFLAGS = $(WARNINGS) -lGL -lGLU -lglut -lm -pthread
 
 OGL_OBJS=../ansiutils/gfx_opengl.o ../ansiutils/bmf.o ../ansiutils/libansicanvas.a
