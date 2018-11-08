@@ -940,17 +940,6 @@ int main(int argc, char* argv[])
             case 'z':
                 /* opengl graphics enabled */
                 opengl_enable = true;
-                /*
-                printf("Enabling OpenGL backend ...\r\n");
-                opengl_enable = true;
-                myfont = bmf_load(filename);
-
-                if (!myfont) {
-                perror("bmf_load");
-                exit(1);
-                }
-                gfx_opengl_main(640, 384, "MyAmazingWindowTitle");
-                */
                 break;
             case 's':
                 srecord = 1;
@@ -1080,7 +1069,7 @@ void sysbus_rungraphics()
 
     printf("sysbus_rungraphics()\r\n");
     fflush(NULL);
-    gfx_opengl_main(640, 384, "MyAmazingWindowTitle");
+//    gfx_opengl_main(640, 384, "68K");
     gfx_opengl_main(gfx_opengl_getwidth(), gfx_opengl_getheight(), "68K");
     while (1) { }
 }
