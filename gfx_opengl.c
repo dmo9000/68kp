@@ -7,11 +7,7 @@
 #include <time.h>
 #include "rawfont.h"
 #include "ansicanvas.h"
-#include "m68k.h"
-
-//OGL_Window* window;
-//OGL_Renderer* renderer;
-//OGL_Surface *tmpsurface;
+//#include "m68k.h"
 
 // Display size
 #define SCREEN_WIDTH    640
@@ -24,7 +20,10 @@ int modifier = 2;
 extern int g_trace;
 
 typedef unsigned char u8;
-u8 screenData[SCREEN_HEIGHT][SCREEN_WIDTH][3];
+//u8 screenData[SCREEN_HEIGHT][SCREEN_WIDTH][3];
+//u8 *screenData[][][];
+//u8 ***screenData;
+u8 *screenData;
 int gfx_opengl_drawglyph(BitmapFont *font, uint16_t px, uint16_t py, uint8_t glyph, uint8_t fg, uint8_t bg, uint8_t attr);
 //char *p = "HELLO WORLD THIS IS YOUR CAPTAIN SPEAKING PT2, PLEASE STANDBY";
 extern BitmapFont *myfont;
@@ -33,55 +32,34 @@ extern BitmapFont *myfont;
 unsigned char kbbuf[MAX_KBBUF_LEN];
 volatile uint8_t kbbuf_len = 0;
 
+uint16_t gfx_opengl_width;
+uint16_t gfx_opengl_height;
 
-void output_character(char c)
+
+uint16_t gfx_opengl_getwidth()
 {
-    int i = 0, j = 0;
-    static int cx=0, cy=0;
-    //printf("output character = %c\r\n", c);
+    return gfx_opengl_width;
+}
 
+uint16_t gfx_opengl_getheight()
+{
+    return gfx_opengl_height;
+}
 
-    if (c == '\r') {
-        cy++;
-        if (cy > 23 ) {
-            /* hardware scroll required */
-            gfx_opengl_hwscroll();
-            cy = 23;
-        }
+void grx_opengl_setdimensions(uint16_t w, uint16_t h)
+{
 
-        return;
-    }
+    gfx_opengl_width = w;
+    gfx_opengl_height = h;
 
-    if (c == '\n') {
-        cx = 0;
-        return;
-    }
-
-    if (cy > 23 ) {
-        /* hardware scroll required */
-        gfx_opengl_hwscroll();
-        cy = 23;
-    }
-    //assert (cy < 25);
-
-    gfx_opengl_drawglyph(myfont, cx, cy, c, 7, 0, 0);
-    cx++;
-    if (cx == 80) {
-        cx = 0;
-        cy ++;
-    }
 }
 
 void updateTexture()
 {
 
-    /*
-    while (p[0] != 0) {
-    output_character(p[0]);
-    p++;
-    }
-    */
-    glTexSubImage2D(GL_TEXTURE_2D, 0,0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid*)screenData);
+//    glTexSubImage2D(GL_TEXTURE_2D, 0,0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid*)screenData);
+    glTexSubImage2D(GL_TEXTURE_2D, 0,0, 0, gfx_opengl_width, gfx_opengl_height, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid*)screenData);
+
     glBegin( GL_QUADS );
     glTexCoord2d(0.0, 0.0);
     glVertex2d(0.0,       0.0);
@@ -106,7 +84,7 @@ void reshape_window(GLsizei w, GLsizei h)
 {
     //w = SCREEN_WIDTH;
     //h = SCREEN_HEIGHT;
-    //printf("reshape_window(w=%u,h=%u)\n", w, h);
+    printf("reshape_window(w=%u,h=%u)\n", w, h);
     glClearColor(0.0f, 0.0f, 0.5f, 0.0f);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -122,6 +100,8 @@ void reshape_window(GLsizei w, GLsizei h)
 void setupTexture()
 {
 
+    printf("setupTexture(%ux%u)\r\n", gfx_opengl_width, gfx_opengl_height);
+    screenData = malloc(gfx_opengl_width * gfx_opengl_height * 3);
 
     // Clear screen
     /*
@@ -141,13 +121,12 @@ void setupTexture()
     	*/
 
     // Create a texture
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid*)screenData);
+    //glTexImage2D(GL_TEXTURE_2D, 0, 3, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid*)screenData);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, gfx_opengl_width, gfx_opengl_height, 0, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid*)screenData);
 
     // Set up the texture
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
@@ -158,9 +137,19 @@ void setupTexture()
 
 void setTexturePixel(int x, int y, u8 r, u8 g, u8 b)
 {
-    screenData[y][x][0] = r;
-    screenData[y][x][1] = g;
-    screenData[y][x][2] = b;
+    unsigned char *scrP;
+    scrP = screenData;
+
+    scrP += (y * gfx_opengl_width * 3) + (x * 3);
+    *scrP = r;
+    scrP++;
+    *scrP = g;
+    scrP++;
+    *scrP = b;
+
+    //	screenData[y][x][0] = r;
+    //screenData[y][x][1] = g;
+    //screenData[y][x][2] = b;
 }
 
 
@@ -195,21 +184,23 @@ int gfx_opengl_hwscroll()
     d.h = 384 - 16;
     */
 
-    for(int y = 0; y < (SCREEN_HEIGHT - 16); y++)  {
-        for(int x = 0; x < SCREEN_WIDTH; x++) {
-            screenData[y][x][0] = screenData[y+16][x][0];
-            screenData[y][x][1] = screenData[y+16][x][1];
-            screenData[y][x][2] = screenData[y+16][x][2];
+    /*
+        for(int y = 0; y < (SCREEN_HEIGHT - 16); y++)  {
+            for(int x = 0; x < SCREEN_WIDTH; x++) {
+                screenData[y][x][0] = screenData[y+16][x][0];
+                screenData[y][x][1] = screenData[y+16][x][1];
+                screenData[y][x][2] = screenData[y+16][x][2];
+            }
         }
-    }
 
-    for(int y = (SCREEN_HEIGHT-16); y < (SCREEN_HEIGHT); y++)  {
-        for(int x = 0; x < SCREEN_WIDTH; x++) {
-            screenData[y][x][0] = 0;
-            screenData[y][x][1] = 0;
-            screenData[y][x][2] = 0;
+        for(int y = (SCREEN_HEIGHT-16); y < (SCREEN_HEIGHT); y++)  {
+            for(int x = 0; x < SCREEN_WIDTH; x++) {
+                screenData[y][x][0] = 0;
+                screenData[y][x][1] = 0;
+                screenData[y][x][2] = 0;
+            }
         }
-    }
+    */
 
 //    assert(!OGL_BlitSurface(winsurf, &s, tmpsurface, &d));
 
@@ -226,7 +217,7 @@ int gfx_opengl_drawglyph(BitmapFont *font, uint16_t px, uint16_t py, uint8_t gly
     uint8_t rx = 0;
     uint8_t h = 0;
 
-//    printf("gfx_opengl_drawglyph(%u, %u, %u, %u, '%c', fg=%u, bg=%u)\n", px, py, font->header.px, font->header.py, glyph, fg, bg);
+    //printf("gfx_opengl_drawglyph(%u, %u, %u, %u, '%c', fg=%u, bg=%u)\n", px, py, font->header.px, font->header.py, glyph, fg, bg);
 
     if (attr & ATTRIB_REVERSE) {
         bgc = canvas_displaycolour(fg + ((attr & ATTRIB_BOLD ? 8 : 0)));
@@ -243,16 +234,16 @@ int gfx_opengl_drawglyph(BitmapFont *font, uint16_t px, uint16_t py, uint8_t gly
             rx = font->fontdata[(glyph*font->header.py) + ii];
 
             if (rx & jj) {
-//                    setTexturePixel((px*8) + h, (py*16)+(ii*2), fgc->r, fgc->g, fgc->b);
-//                    setTexturePixel((px*8) + h, (py*16)+(ii*2)+1, fgc->r, fgc->g, fgc->b);
-                setTexturePixel((px*8) + h, (py*16)+(ii*2), 255, 255, 255);
-                setTexturePixel((px*8) + h, (py*16)+(ii*2)+1, 255, 255, 255);
+                setTexturePixel((px*8) + h, (py*16)+(ii*2), fgc->r, fgc->g, fgc->b);
+                setTexturePixel((px*8) + h, (py*16)+(ii*2)+1, fgc->r, fgc->g, fgc->b);
+//                setTexturePixel((px*8) + h, (py*16)+(ii*2), 255, 255, 255);
+//                setTexturePixel((px*8) + h, (py*16)+(ii*2)+1, 255, 255, 255);
 //                    printf("X");
             } else {
-//                    setTexturePixel((px*8) + h, (py*16)+(ii*2), bgc->r, bgc->g, bgc->b);
-//                    setTexturePixel((px*8) + h, (py*16)+(ii*2)+1, bgc->r, bgc->g, bgc->b);
-                setTexturePixel((px*8) + h, (py*16)+(ii*2), 0, 0, 0);
-                setTexturePixel((px*8) + h, (py*16)+(ii*2)+1, 0, 0, 0);
+                setTexturePixel((px*8) + h, (py*16)+(ii*2), bgc->r, bgc->g, bgc->b);
+                setTexturePixel((px*8) + h, (py*16)+(ii*2)+1, bgc->r, bgc->g, bgc->b);
+//                setTexturePixel((px*8) + h, (py*16)+(ii*2), 0, 0, 0);
+//                setTexturePixel((px*8) + h, (py*16)+(ii*2)+1, 0, 0, 0);
 //                    printf(" ");
             }
             h++;
@@ -317,12 +308,14 @@ int gfx_opengl_main(uint16_t xsize, uint16_t ysize, char *WindowTitle)
     //glutInit(0, NULL);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
 
-    display_width = SCREEN_WIDTH * modifier;
-    display_height = SCREEN_HEIGHT * modifier;
+//    display_width = SCREEN_WIDTH * modifier;
+//    display_height = SCREEN_HEIGHT * modifier;
+    display_width = xsize;
+    display_height = ysize;
 
     glutInitWindowSize(display_width, display_height);
 //    glutInitWindowPosition(320, 320);
-    glutCreateWindow("68K");
+    glutCreateWindow(WindowTitle);
 
     glutDisplayFunc(display);
     glutIdleFunc(display);
@@ -353,7 +346,7 @@ int gfx_opengl_canvas_render(ANSICanvas *canvas, BitmapFont *myfont)
     assert(width);
     assert(height);
 
-    //printf("gfx_opengl_canvas_render(%ux%u)\n", width, height);
+    printf("gfx_opengl_canvas_render(%ux%u)\n", width, height);
     for (uint16_t ii = 0; ii < height; ii++) {
         r = canvas_get_raster(canvas, ii);
         if (r) {
