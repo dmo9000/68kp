@@ -209,8 +209,8 @@ bool opengl_enable = false;
 struct termios oldattr;
 #endif
 
-pthread_t graphics_thread;
-void sysbus_rungraphics();
+//pthread_t graphics_thread;
+//void sysbus_rungraphics();
 
 #ifndef __MINGW__
 int kbhit(void)
@@ -403,7 +403,8 @@ void MC6850_data_write(unsigned int value)
 
     if (opengl_enable) {
         /* send character to the opengl driver */
-        output_character(value);
+        //output_character(value);
+        ansitty_putc(value);
     }
 
     if((g_MC6850_control & 0x60) == 0x20)   // transmit interupt enabled?
@@ -995,9 +996,11 @@ int main(int argc, char* argv[])
       Set the terminal to raw mode (no echo and not cooked) so that it looks
       like a dumb serial port.
      */
-    tcgetattr(STDIN_FILENO, &oldattr);
-    newattr = oldattr;
-    cfmakeraw(&newattr);
+    if (!opengl_enable) {
+        tcgetattr(STDIN_FILENO, &oldattr);
+        newattr = oldattr;
+        cfmakeraw(&newattr);
+    }
 
 #ifndef FIGFORTH
     if(g_trace)
@@ -1018,17 +1021,20 @@ int main(int argc, char* argv[])
 
     if (opengl_enable) {
         printf("Enabling OpenGL backend ...\r\n");
+        /*
         myfont = bmf_load(filename);
 
         if (!myfont) {
-            perror("bmf_load");
-            exit(1);
+        perror("bmf_load");
+        exit(1);
         }
+        */
 
 
-			 grx_opengl_setdimensions(640, 384);
-        pthread_create( &graphics_thread, NULL, sysbus_rungraphics, NULL);
-				sleep(1);
+        ansitty_init();
+        //grx_opengl_setdimensions(640, 384);
+        // pthread_create( &graphics_thread, NULL, sysbus_rungraphics, NULL);
+        sleep(2);
     }
 
 
@@ -1064,6 +1070,7 @@ void execute_m68k_loop()
 }
 
 
+/*
 void sysbus_rungraphics()
 {
 
@@ -1073,3 +1080,4 @@ void sysbus_rungraphics()
     gfx_opengl_main(gfx_opengl_getwidth(), gfx_opengl_getheight(), "68K");
     while (1) { }
 }
+*/
