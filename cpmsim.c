@@ -1007,9 +1007,11 @@ int main(int argc, char* argv[])
         newattr.c_lflag |= ISIG;    // uncomment to process ^C
 #endif
 
-    newattr.c_cc[VMIN] = 1;       // block until at least one char available
-    newattr.c_cc[VTIME] = 0;
-    tcsetattr(STDIN_FILENO, TCSANOW, &newattr);
+	if (!opengl_enable) {
+	    newattr.c_cc[VMIN] = 1;       // block until at least one char available
+	    newattr.c_cc[VTIME] = 0;
+  	  tcsetattr(STDIN_FILENO, TCSANOW, &newattr);
+			}
 #endif
 
     m68k_init();
