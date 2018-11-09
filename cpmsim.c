@@ -1034,7 +1034,7 @@ int main(int argc, char* argv[])
         ansitty_init();
         //grx_opengl_setdimensions(640, 384);
         // pthread_create( &graphics_thread, NULL, sysbus_rungraphics, NULL);
-        sleep(2);
+        sleep(1);
     }
 
 
