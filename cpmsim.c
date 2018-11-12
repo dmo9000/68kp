@@ -68,6 +68,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <errno.h>
+#include <assert.h>
 #include "sim.h"
 #include "m68k.h"
 #include "rawfont.h"
@@ -132,9 +133,18 @@
 			       ((BASE)[(ADDR)+2]<<8) |	\
 			       (BASE)[(ADDR)+3])
 
-#define WRITE_BYTE(BASE, ADDR, VAL) (BASE)[ADDR] = (VAL)&0xff
-#define WRITE_WORD(BASE, ADDR, VAL) (BASE)[ADDR] = ((VAL)>>8) & 0xff;	\
-  (BASE)[(ADDR)+1] = (VAL)&0xff
+/*
+#define WRITE_BYTE(BASE, ADDR, VAL) { (BASE)[ADDR] = (VAL)&0xff ;	\
+				printf("WRITE_BYTE(%lx+%lx, %x)\r\n", BASE, ADDR, VAL);	\
+				}
+*/
+
+#define WRITE_BYTE(BASE, ADDR, VAL) { (BASE)[ADDR] = (VAL)&0xff ;	\
+				}
+
+#define WRITE_WORD(BASE, ADDR, VAL) { (BASE)[ADDR] = ((VAL)>>8) & 0xff;	\
+  (BASE)[(ADDR)+1] = (VAL)&0xff ; \
+	}
 #define WRITE_LONG(BASE, ADDR, VAL) (BASE)[ADDR] = ((VAL)>>24) & 0xff;	\
   (BASE)[(ADDR)+1] = ((VAL)>>16)&0xff;					\
   (BASE)[(ADDR)+2] = ((VAL)>>8)&0xff;					\
@@ -598,6 +608,7 @@ unsigned int cpu_read_byte(unsigned int address)
 
 unsigned int cpu_read_word(unsigned int address)
 {
+
     switch(address)
     {
     case DISK_STATUS:
@@ -627,6 +638,10 @@ unsigned int cpu_read_long(unsigned int address)
 /* Write data to RAM or a device */
 void cpu_write_byte(unsigned int address, unsigned int value)
 {
+
+    //printf("cpu_write_byte(%lx, %lx)\r\n", address, value);
+    //assert(address < 0x2000000);
+
     switch(address)
     {
     case MC6850_DATA:
@@ -646,11 +661,15 @@ void cpu_write_byte(unsigned int address, unsigned int value)
 
 void cpu_write_word(unsigned int address, unsigned int value)
 {
+//		printf("cpu_write_word(%lx, %lx)\r\n", address, value);
+    //assert(address < 0x2000000);
     WRITE_WORD(g_ram, address, value);
 }
 
 void cpu_write_long(unsigned int address, unsigned int value)
 {
+//		printf("cpu_write_long(%lx, %lx)\r\n", address, value);
+    //assert(address < 0x2000000);
 //  printf("cpu_write_long(0x%08lx, %u)\r\n", address, value);
     switch(address)
     {
@@ -1007,11 +1026,11 @@ int main(int argc, char* argv[])
         newattr.c_lflag |= ISIG;    // uncomment to process ^C
 #endif
 
-	if (!opengl_enable) {
-	    newattr.c_cc[VMIN] = 1;       // block until at least one char available
-	    newattr.c_cc[VTIME] = 0;
-  	  tcsetattr(STDIN_FILENO, TCSANOW, &newattr);
-			}
+    if (!opengl_enable) {
+        newattr.c_cc[VMIN] = 1;       // block until at least one char available
+        newattr.c_cc[VTIME] = 0;
+        tcsetattr(STDIN_FILENO, TCSANOW, &newattr);
+    }
 #endif
 
     m68k_init();

@@ -35,6 +35,7 @@
 
 #include "m68k.h"
 #include <limits.h>
+#include <assert.h>
 
 #if M68K_EMULATE_ADDRESS_ERROR
 #include <setjmp.h>
@@ -798,6 +799,8 @@
 /* =============================== PROTOTYPES ============================= */
 /* ======================================================================== */
 
+typedef unsigned char u8;
+
 typedef struct
 {
 	uint cpu_type;     /* CPU Type: 68000, 68010, 68EC020, or 68020 */
@@ -1077,18 +1080,30 @@ INLINE uint m68ki_read_32_fc(uint address, uint fc)
 
 INLINE void m68ki_write_8_fc(uint address, uint fc, uint value)
 {
+	extern u8 *screenData;
 	m68ki_set_fc(fc); /* auto-disable (see m68kcpu.h) */
-	m68k_write_memory_8(ADDRESS_68K(address), value);
+//	m68k_write_memory_8(ADDRESS_68K(address), value);
+	assert((address < 0x1000000) || (address >= 0x2000000 && address < 0x20B4000));
+	if (address < 0x1000000) {
+		m68k_write_memory_8(ADDRESS_68K(address), value);
+		} else {
+			assert(screenData);
+			screenData[address - 0x2000000] = (value&0xff);
+			//printf("FRAMEBUFFER_WRITE(%08lx, %2x)\r\n", address, value);
+			/* direct framebuffer write */
+		}
 }
 INLINE void m68ki_write_16_fc(uint address, uint fc, uint value)
 {
 	m68ki_set_fc(fc); /* auto-disable (see m68kcpu.h) */
+	assert(address < 0x2000000);
 	m68ki_check_address_error(address, MODE_WRITE, fc); /* auto-disable (see m68kcpu.h) */
 	m68k_write_memory_16(ADDRESS_68K(address), value);
 }
 INLINE void m68ki_write_32_fc(uint address, uint fc, uint value)
 {
 	m68ki_set_fc(fc); /* auto-disable (see m68kcpu.h) */
+	assert(address < 0x2000000);
 	m68ki_check_address_error(address, MODE_WRITE, fc); /* auto-disable (see m68kcpu.h) */
 	m68k_write_memory_32(ADDRESS_68K(address), value);
 }
