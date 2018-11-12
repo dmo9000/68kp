@@ -205,7 +205,7 @@ int ansitty_putc(unsigned char c)
     outbuffer[0] = c;
     if (!ansi_to_canvas(canvas, (unsigned char *) &outbuffer, 1, 0)) {
         printf("+++ error!\n");
-        assert(NULL);
+        //assert(NULL);
     }
     tty_x = current_x;
     tty_y = current_y;
