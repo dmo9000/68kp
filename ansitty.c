@@ -9,6 +9,8 @@
 ANSICanvas *canvas = NULL;
 BitmapFont *myfont = NULL;
 
+#define TAB_WIDTH	10
+
 #define width 80
 #define height 24
 
@@ -20,7 +22,6 @@ uint16_t last_x;
 uint16_t last_y;
 
 extern bool allow_clear;
-
 pthread_t graphics_thread;
 
 void sysbus_rungraphics()
@@ -152,7 +153,18 @@ int ansitty_putc(unsigned char c)
 
     if (!c) return 0;
 
+    if (c == '\t') {
+        /* TAB */
+        if ((current_x % TAB_WIDTH)) {
+            gfx_opengl_render_cursor(canvas, myfont, (current_x % 80),  current_y + (current_x / 80), false);
+            current_x += (TAB_WIDTH- (current_x % TAB_WIDTH));
+            //gfx_opengl_render_cursor(canvas, myfont, (tty_x % 80),  tty_y + (tty_x / 80), false);
+            return 0;
+        }
+    }
+
     if (c == '\b') {
+        /* BACKSPACE */
         if ((tty_y + (tty_x / 80) < canvas->lines)) {
             gfx_opengl_render_cursor(canvas, myfont, (tty_x % 80),  tty_y + (tty_x / 80), false);
         }
