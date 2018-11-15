@@ -698,6 +698,7 @@ void cpu_write_long(unsigned int address, unsigned int value)
         disk_flush();
         return;
     case CPM_EXIT:
+				glutLeaveMainLoop(); 
         fprintf(stderr, "CP/M-68K terminating normally\r\n");
         termination_handler(0);
         return;
