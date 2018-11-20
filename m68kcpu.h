@@ -1083,6 +1083,12 @@ INLINE void m68ki_write_8_fc(uint address, uint fc, uint value)
 	extern u8 *screenData;
 	m68ki_set_fc(fc); /* auto-disable (see m68kcpu.h) */
 //	m68k_write_memory_8(ADDRESS_68K(address), value);
+
+	if (!(address < 0x1000000) || (address >= 0x2000000 && address < 0x20B4000)) {
+			printf("address = 0x%08lx\r\n", address);
+			fflush(NULL);
+			}
+
 	assert((address < 0x1000000) || (address >= 0x2000000 && address < 0x20B4000));
 	if (address < 0x1000000) {
 		m68k_write_memory_8(ADDRESS_68K(address), value);
@@ -1103,6 +1109,9 @@ INLINE void m68ki_write_16_fc(uint address, uint fc, uint value)
 INLINE void m68ki_write_32_fc(uint address, uint fc, uint value)
 {
 	m68ki_set_fc(fc); /* auto-disable (see m68kcpu.h) */
+	if (address >= 0x2000000) {
+			printf("m68ki_write_32_fc(0x%08lx, %u, %u)\r\n", address, fc, value);
+			}
 	assert(address < 0x2000000);
 	m68ki_check_address_error(address, MODE_WRITE, fc); /* auto-disable (see m68kcpu.h) */
 	m68k_write_memory_32(ADDRESS_68K(address), value);
