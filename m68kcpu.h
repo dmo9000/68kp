@@ -1084,11 +1084,6 @@ INLINE void m68ki_write_8_fc(uint address, uint fc, uint value)
 	m68ki_set_fc(fc); /* auto-disable (see m68kcpu.h) */
 //	m68k_write_memory_8(ADDRESS_68K(address), value);
 
-	if (!(address < 0x1000000) || (address >= 0x2000000 && address < 0x20B4000)) {
-			printf("address = 0x%08lx\r\n", address);
-			fflush(NULL);
-			}
-
 	assert((address < 0x1000000) || (address >= 0x2000000 && address < 0x20B4000));
 	if (address < 0x1000000) {
 		m68k_write_memory_8(ADDRESS_68K(address), value);
