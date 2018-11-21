@@ -260,7 +260,9 @@ void termination_handler(int signum)
     int i;
 
 #ifndef __MINGW__
+    //printf("Restoring terminal to cooked mode...\r\n");
     tcsetattr(STDIN_FILENO, TCSANOW, &oldattr);  // restore terminal settings
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &oldattr);
 #endif
 
     for(i = 0; i < 16; i++)
@@ -698,7 +700,9 @@ void cpu_write_long(unsigned int address, unsigned int value)
         disk_flush();
         return;
     case CPM_EXIT:
-				glutLeaveMainLoop(); 
+        if (opengl_enable) {
+            glutLeaveMainLoop();
+        }
         fprintf(stderr, "CP/M-68K terminating normally\r\n");
         termination_handler(0);
         return;

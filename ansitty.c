@@ -276,7 +276,7 @@ void ansitty_canvas_setdirty(bool state)
 
 void output_character(char c)
 {
-    int i = 0, j = 0;
+    //int i = 0, j = 0;
     static int cx=0, cy=0;
     //printf("output character = %c\r\n", c);
     if (c == '\r') {
