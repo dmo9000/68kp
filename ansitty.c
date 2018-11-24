@@ -30,7 +30,7 @@ void sysbus_rungraphics()
     printf("sysbus_rungraphics()\r\n");
     fflush(NULL);
 //    gfx_opengl_main(640, 384, "68K");
-    gfx_opengl_main(gfx_opengl_getwidth(), gfx_opengl_getheight(), 1, "68K");
+    gfx_opengl_main(gfx_opengl_getwidth(), gfx_opengl_getheight(), 2, "68K");
     while (1) { }
 }
 
