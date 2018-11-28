@@ -1,0 +1,10 @@
+SIXEL support would be nice: 
+
+	http://www.vt100.net/docs/vt3xx-gp/chapter14.html
+	http://www.digiater.nl/openvms/decus/vax90b1/krypton-nasa/all-about-sixels.text
+
+xterm-256color support?
+
+Unicode. 
+
+Support for antialised, monospaced fonts that aren't 8x8 BMF format.
