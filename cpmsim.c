@@ -1096,14 +1096,3 @@ void execute_m68k_loop()
 }
 
 
-/*
-void sysbus_rungraphics()
-{
-
-    printf("sysbus_rungraphics()\r\n");
-    fflush(NULL);
-//    gfx_opengl_main(640, 384, "68K");
-    gfx_opengl_main(gfx_opengl_getwidth(), gfx_opengl_getheight(), "68K");
-    while (1) { }
-}
-*/

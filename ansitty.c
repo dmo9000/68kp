@@ -29,9 +29,11 @@ void sysbus_rungraphics()
 
     printf("sysbus_rungraphics()\r\n");
     fflush(NULL);
-//    gfx_opengl_main(640, 384, "68K");
-    gfx_opengl_main(gfx_opengl_getwidth(), gfx_opengl_getheight(), 2, "68K");
-    while (1) { }
+    gfx_opengl_main(canvas, gfx_opengl_getwidth(), gfx_opengl_getheight(), 2, "68K");
+    while (1) { 
+			sleep(1);
+			pthread_yield();
+			}
 }
 
 
