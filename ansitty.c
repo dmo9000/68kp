@@ -1,5 +1,7 @@
+#define _GNU_SOURCE
 #include <assert.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <pthread.h>
 #include "ansistate.h"
 #include "ansicanvas.h"
@@ -36,7 +38,7 @@ int ansitty_set_process_fd(int fd)
     return 1;
 }
 
-void sysbus_rungraphics()
+void *sysbus_rungraphics()
 {
 
     printf("sysbus_rungraphics()\r\n");
@@ -46,7 +48,8 @@ void sysbus_rungraphics()
     while (1) {
         /* don't busy wait */
         pthread_yield();
-        usleep(10000);
+        //usleep(10000);
+        sleep(30);
     }
 }
 
@@ -160,6 +163,7 @@ int ansitty_drawcursor(bool state)
 int ansitty_updatecursor()
 {
 
+    //fprintf(stderr, "ansitty_updatecursor()\n");
     if (canvas->cursor_enabled) {
         if (cursor_phase) {
             gfx_opengl_render_cursor(canvas, myfont, current_x,  current_y, true);
@@ -185,7 +189,7 @@ int ansitty_putc(unsigned char c)
     if (c == '\t') {
         /* TAB */
         if ((current_x % TAB_WIDTH)) {
-            gfx_opengl_render_cursor(canvas, myfont, (current_x % 80),  current_y + (current_x / 80), false);
+            //gfx_opengl_render_cursor(canvas, myfont, (current_x % 80),  current_y + (current_x / 80), false);
             current_x += (TAB_WIDTH- (current_x % TAB_WIDTH));
             return 0;
         }
@@ -194,7 +198,7 @@ int ansitty_putc(unsigned char c)
     if (c == '\b') {
         /* BACKSPACE */
         if ((tty_y + (tty_x / 80) < canvas->lines)) {
-            gfx_opengl_render_cursor(canvas, myfont, (tty_x % 80),  tty_y + (tty_x / 80), false);
+            // gfx_opengl_render_cursor(canvas, myfont, (tty_x % 80),  tty_y + (tty_x / 80), false);
         }
         if (current_x > 0) {
             current_x --;
@@ -210,7 +214,7 @@ int ansitty_putc(unsigned char c)
         tty_x = current_x;
         tty_y = current_y;
         if ((tty_y + (tty_x / 80) < canvas->lines)) {
-            gfx_opengl_render_cursor(canvas, myfont, (tty_x % 80),  tty_y + (tty_x / 80), true);
+            //gfx_opengl_render_cursor(canvas, myfont, (tty_x % 80),  tty_y + (tty_x / 80), true);
         }
         return 0;
     }
@@ -234,7 +238,7 @@ int ansitty_putc(unsigned char c)
     tty_x = current_x;
     tty_y = current_y;
     if ((tty_y + (tty_x / 80) < canvas->lines)) {
-        gfx_opengl_render_cursor(canvas, myfont, (tty_x % 80),  tty_y + (tty_x / 80), false);
+        //gfx_opengl_render_cursor(canvas, myfont, (tty_x % 80),  tty_y + (tty_x / 80), false);
     }
 
 //    }
@@ -256,7 +260,7 @@ int ansitty_putc(unsigned char c)
         //printf("FULL CANVAS REFRESH\n");
         gfx_opengl_canvas_render(canvas, myfont);
         if ((tty_y + (tty_x / 80) < canvas->lines)) {
-            gfx_opengl_render_cursor(canvas, myfont, (tty_x % 80),  tty_y + (tty_x / 80), true);
+            //gfx_opengl_render_cursor(canvas, myfont, (tty_x % 80),  tty_y + (tty_x / 80), true);
         }
         canvas->repaint_entire_canvas = false;
         canvas->is_dirty = true;
@@ -274,7 +278,7 @@ int ansitty_putc(unsigned char c)
             tty_y = current_y;
             gfx_opengl_canvas_render_xy(canvas, myfont, last_x, last_y);
             if ((tty_y + (tty_x / 80) < canvas->lines)) {
-                gfx_opengl_render_cursor(canvas, myfont, (tty_x % 80),  tty_y + (tty_x / 80), true);
+                //gfx_opengl_render_cursor(canvas, myfont, (tty_x % 80),  tty_y + (tty_x / 80), true);
             }
             canvas->is_dirty = true;
         }
