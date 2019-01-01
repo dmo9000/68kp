@@ -1,4 +1,4 @@
-CC = /usr/bin/x86_64-w64-mingw32-gcc-6.4.0.exe 
+CC = /usr/bin/x86_64-w64-mingw32-gcc.exe 
 WARNINGS = -Wall
 CFLAGS = $(WARNINGS) -g -ggdb -O2 -c -Iobj -D__MINGW__ -I. -I../ansiutils
 LFLAGS = $(WARNINGS)  
