@@ -72,6 +72,7 @@
 #include "sim.h"
 #include "m68k.h"
 #include "rawfont.h"
+#include "ansitty.h"
 
 //#define FIGFORTH
 
@@ -200,6 +201,7 @@ unsigned char g_ramdisk[RAMDISK_SIZE];
 
 unsigned int g_fc;       /* Current function code from CPU */
 
+ANSITTY *TTYDevice = NULL;
 BitmapFont *myfont;
 bool opengl_enable = false;
 
@@ -416,7 +418,7 @@ void MC6850_data_write(unsigned int value)
     if (opengl_enable) {
         /* send character to the opengl driver */
         //output_character(value);
-        ansitty_putc(value);
+        ansitty_putc(TTYDevice, value);
     }
 
     if((g_MC6850_control & 0x60) == 0x20)   // transmit interupt enabled?
@@ -1057,7 +1059,7 @@ int main(int argc, char* argv[])
         */
 
 
-        ansitty_init();
+        TTYDevice = ansitty_init();
         //grx_opengl_setdimensions(640, 384);
         // pthread_create( &graphics_thread, NULL, sysbus_rungraphics, NULL);
         sleep(1);
