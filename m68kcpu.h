@@ -37,6 +37,7 @@
 #include <stdio.h>
 #include <limits.h>
 #include <assert.h>
+#include <stdbool.h>
 
 #if M68K_EMULATE_ADDRESS_ERROR
 #include <setjmp.h>
@@ -1085,10 +1086,16 @@ INLINE void m68ki_write_8_fc(uint address, uint fc, uint value)
 	m68ki_set_fc(fc); /* auto-disable (see m68kcpu.h) */
 //	m68k_write_memory_8(ADDRESS_68K(address), value);
 
-	assert((address < 0x1000000) || (address >= 0x2000000 && address < 0x20B4000));
+//	assert((address < 0x1000000) || (address >= 0x2000000 && address < 0x20B4000));
+	assert((address < 0x1000000) || (address >= 0x1FFFFFF && address < 0x20B4000));
 	if (address < 0x1000000) {
 		m68k_write_memory_8(ADDRESS_68K(address), value);
 		} else {
+			if (address == 0x1FFFFFF) {
+				//fprintf(stderr, "+++ explicit frameswap\n");
+				ansitty_canvas_setdirty(true);
+				return;
+				}
 			assert(screenData);
 			screenData[address - 0x2000000] = (value&0xff);
 			//printf("FRAMEBUFFER_WRITE(%08lx, %2x)\r\n", address, value);
