@@ -18,6 +18,9 @@ BitmapFont *myfont = NULL;
 #define width 80
 #define height 24
 
+#define DEFAULT_WIDTH		80
+#define DEFAULT_HEIGHT	24
+
 //uint16_t tty_x = 0;
 //uint16_t tty_y = 0;
 extern uint16_t current_x;
@@ -28,7 +31,7 @@ extern bool allow_clear;
 bool cursor_phase = false;
 
 extern int process_fd;
-pthread_t graphics_thread;
+//pthread_t graphics_thread;
 
 /* maximum length of a single ANSI sequence */
 #define MAX_SEQUENCE		sizeof(uint8_t)
@@ -49,20 +52,17 @@ int ansitty_set_process_fd(int fd)
     return 1;
 }
 
-void *sysbus_rungraphics()
+void *ansitty_rungraphics()
 {
 
-    printf("sysbus_rungraphics()\r\n");
+    printf("ansitty_rungraphics()\r\n");
     fflush(NULL);
     /* MULTIPLIER SET HERE */
     gfx_opengl_main(canvas, gfx_opengl_getwidth(), gfx_opengl_getheight(), 1, "8btty");
     while (1) {
         /* don't busy wait */
-#ifndef __MINGW__
         pthread_yield();
-#else
-				sched_yield();
-#endif
+        //usleep(10000);
         sleep(30);
     }
 }
@@ -84,8 +84,8 @@ ANSITTY *new_ansitty(uint16_t w, uint16_t h)
         return NULL;
     }
 
-    New_TTY->w = w;
-    New_TTY->h = h;
+    New_TTY->columns = w;
+    New_TTY->rows = h;
 
     return New_TTY;
 
@@ -98,7 +98,7 @@ ANSITTY* ansitty_init()
     char *font_filename = NULL;
     printf("ansitty_init()\r\n");
 
-    New_TTY = new_ansitty(width, height);
+    New_TTY = new_ansitty(DEFAULT_WIDTH, DEFAULT_HEIGHT);
 
 //    font_filename = "bmf/8x8.bmf";
     //myfont = bmf_load(font_filename);
@@ -147,9 +147,9 @@ ANSITTY* ansitty_init()
         }
     }
 
-    gfx_opengl_setdimensions((width*8), (height*16));
+    gfx_opengl_setdimensions(New_TTY->columns*8,New_TTY->rows*16);
 
-    pthread_create( &graphics_thread, NULL, sysbus_rungraphics, NULL);
+    pthread_create( &New_TTY->graphics_thread, NULL, ansitty_rungraphics, NULL);
 
     return New_TTY;
 
@@ -235,8 +235,25 @@ int ansitty_updatecursor()
     return 1;
 }
 
+
+int ansitty_putc_upper(ANSITTY *device, unsigned char c)
+{
+		/* the "upper" layer, where terminal specific codes are handled */
+		//printf("ansitty_putc_upper(..., '%c')\n", c);
+		return 0;
+}
+
 int ansitty_putc(ANSITTY *device, unsigned char c)
 {
+  return ansitty_putc_lower(device, c);
+}
+
+int ansitty_putc_lower(ANSITTY *device, unsigned char c)
+{
+
+		/* the lower layer, where everthing else is dispatched to the 
+			 underlying canvas */
+
     static bool cursor_has_moved = false;
     unsigned char outbuffer[2];
     last_x = current_x;

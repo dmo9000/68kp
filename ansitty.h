@@ -9,10 +9,11 @@
 
 
 typedef struct _ansitty {
-												uint16_t w;
-												uint16_t h;
+												uint16_t columns;
+												uint16_t rows;
 												ANSICanvas *canvas;
 												uint32_t debug_flags;
+												pthread_t graphics_thread;
 												} ANSITTY;
 
 ANSITTY* ansitty_init();
@@ -26,5 +27,8 @@ int ansitty_updatecursor();
 int tty_getbuflen();
 int input_character();
 
+/* latest API changes */
+
+int ansitty_putc_lower(ANSITTY *device, unsigned char c);
 
 #endif /* __ANSITTY_H__ */

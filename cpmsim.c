@@ -74,6 +74,8 @@
 #include "rawfont.h"
 #include "ansitty.h"
 
+extern bool auto_line_wrap;
+
 //#define FIGFORTH
 
 /* Memory-mapped IO ports */
@@ -953,6 +955,7 @@ int main(int argc, char* argv[])
     struct termios newattr;
 #endif
 
+		auto_line_wrap = true;
     init_disks();
 
     while((c = getopt(argc, argv, "stza:b:c:d:e:f:g:h:i:j:k:l:n:o:p:")) != -1)
