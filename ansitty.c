@@ -58,7 +58,7 @@ void *ansitty_rungraphics()
     printf("ansitty_rungraphics()\r\n");
     fflush(NULL);
     /* MULTIPLIER SET HERE */
-    gfx_opengl_main(canvas, gfx_opengl_getwidth(), gfx_opengl_getheight(), 1, "8btty");
+    gfx_opengl_main(canvas, gfx_opengl_getwidth(), gfx_opengl_getheight(), 2, "68kp");
     while (1) {
         /* don't busy wait */
         pthread_yield();
