@@ -75,6 +75,7 @@
 #include "ansitty.h"
 
 extern bool auto_line_wrap;
+extern bool tty_nodelay;
 
 //#define FIGFORTH
 
@@ -206,6 +207,7 @@ unsigned int g_fc;       /* Current function code from CPU */
 ANSITTY *TTYDevice = NULL;
 BitmapFont *myfont;
 bool opengl_enable = false;
+extern volatile uint8_t kbbuf_len;
 
 /* OS-dependant code to get a character from the user.
  */
@@ -598,17 +600,20 @@ void init_disks(void)
 /* Read data from RAM */
 unsigned int cpu_read_byte(unsigned int address)
 {
+
+		//printf("cpu_read_bytes(uint16_t 0x%08x)\n", address);
     switch(address)
     {
     case MC6850_DATA:
         //printf("MC6850_data_read()\r\n");
         return MC6850_data_read();
     case MC6850_STAT:
-        return MC6850_status_read();
+        //printf("MC6850_status_read()\r\n");
+				return (kbbuf_len);	
+        //return MC6850_status_read();
     default:
         break;
     }
-
     return READ_BYTE(g_ram, address);
 }
 
