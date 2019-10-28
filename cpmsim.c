@@ -87,6 +87,11 @@ extern bool tty_nodelay;
 #define MC6850_STAT  0xff1000L     // command/status register
 #define MC6850_DATA  0xff1002L     // receive/transmit data register
 
+#define MOUSE_X  0xff1004L     // hardware mouse X position 
+#define MOUSE_Y  0xff1006L     // hardware mouse Y position
+extern uint16_t mouse_x; 
+extern uint16_t mouse_y; 
+
 /* Memory mapped disk system */
 
 #define DISKC_FILENAME "diskc.cpm.fs"
@@ -622,6 +627,12 @@ unsigned int cpu_read_word(unsigned int address)
 
     switch(address)
     {
+		case MOUSE_X:
+				return mouse_x;
+				break;
+		case MOUSE_Y:
+				return mouse_y;
+				break;
     case DISK_STATUS:
         return g_disk_status;
     default:
