@@ -87,8 +87,10 @@ extern bool tty_nodelay;
 #define MC6850_STAT  0xff1000L     // command/status register
 #define MC6850_DATA  0xff1002L     // receive/transmit data register
 
-#define MOUSE_X  0xff1004L     // hardware mouse X position 
-#define MOUSE_Y  0xff1006L     // hardware mouse Y position
+#define MOUSE_X  	0xff1004L     // hardware mouse X position 
+#define MOUSE_Y  	0xff1006L     // hardware mouse Y position
+#define MOUSE_HWC	0xff1008L
+
 extern uint16_t mouse_x; 
 extern uint16_t mouse_y; 
 
@@ -271,7 +273,7 @@ void termination_handler(int signum)
     int i;
 
 #ifndef __MINGW__
-    //printf("Restoring terminal to cooked mode...\r\n");
+    printf("Restoring terminal to cooked mode...\r\n");
     tcsetattr(STDIN_FILENO, TCSANOW, &oldattr);  // restore terminal settings
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &oldattr);
 #endif
@@ -298,7 +300,9 @@ void exit_error(char* fmt, ...)
     va_list args;
 
 #ifndef __MINGW__
+		printf("Exiting in exit_error()\n");
     tcsetattr(STDIN_FILENO, TCSANOW, &oldattr);  // restore terminal settings
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &oldattr);  // restore terminal settings
 #endif
 
 
@@ -666,6 +670,17 @@ void cpu_write_byte(unsigned int address, unsigned int value)
 
     switch(address)
     {
+		case MOUSE_HWC:
+				printf("MOUSE_HWC(%s)\r\n", (value ? "ON" : "OFF"));
+				switch (value) {
+						case 0:
+							set_mouse_cursor_visible(false);
+							break;
+						default:
+							set_mouse_cursor_visible(true);
+							break;
+						}
+				return;
     case MC6850_DATA:
         //printf("MC6580_DATA(%x, %x, '%c')\r\n", address, value, value);
         MC6850_data_write(value&0xff);
@@ -1041,8 +1056,9 @@ int main(int argc, char* argv[])
       Set the terminal to raw mode (no echo and not cooked) so that it looks
       like a dumb serial port.
      */
+
+    tcgetattr(STDIN_FILENO, &oldattr);
     if (!opengl_enable) {
-        tcgetattr(STDIN_FILENO, &oldattr);
         newattr = oldattr;
         cfmakeraw(&newattr);
     }
