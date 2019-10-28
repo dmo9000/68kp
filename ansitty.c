@@ -61,7 +61,7 @@ void *ansitty_rungraphics()
     gfx_opengl_main(canvas, gfx_opengl_getwidth(), gfx_opengl_getheight(), 2, "68kp");
     while (1) {
         /* don't busy wait */
-        pthread_yield();
+        //pthread_yield();
         //usleep(10000);
         sleep(30);
     }
