@@ -671,7 +671,7 @@ void cpu_write_byte(unsigned int address, unsigned int value)
     switch(address)
     {
 		case MOUSE_HWC:
-				printf("MOUSE_HWC(%s)\r\n", (value ? "ON" : "OFF"));
+				printf("\r\n<MOUSE_HWC(%s)>\r\n", (value ? "ON" : "OFF"));
 				switch (value) {
 						case 0:
 							set_mouse_cursor_visible(false);
