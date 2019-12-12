@@ -727,6 +727,7 @@ void cpu_write_long(unsigned int address, unsigned int value)
         return;
     case DISK_WRITE:
         disk_write(value);
+        //printf("DISK_READ(0x%08x)\r\n", value);
         if(g_disk_status == -1)
             fprintf(stderr, "\r\nwrite error: drive:%c  sector: %d\r\n",
                     g_disk_drive+'A', g_disk_sector);
